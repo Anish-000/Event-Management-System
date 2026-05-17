@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+</head>
+<body
+    class="dashboard-body"
+    data-user-name="{{ session.name }}"
+    data-user-email=""
+>
+
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('user_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('view_cart') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="9" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="20" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Cart
+                </a>
+                <a href="{{ url_for('view_guestlist') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Guest List
+                </a>
+                <a href="{{ url_for('user_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Order Status
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
+
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Check<em>out</em></h1>
+                        <p class="page-subtitle">Complete your order details below</p>
+                    </div>
+                    <a href="{{ url_for('view_cart') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Back to Cart
+                    </a>
+                </div>
+
+                <div class="checkout-layout fade-in fade-in-delay-1">
+
+                    <!-- ── Left: Form ───────────────────────── -->
+                    <form
+                        id="checkout-form"
+                        method="POST"
+                        action="{{ url_for('checkout') }}"
+                        novalidate
+                    >
+                        <div class="checkout-form-card">
+
+                            <!-- Contact Details -->
+                            <div class="checkout-section">
+                                <h2 class="checkout-section-title">Contact Details</h2>
+                                <div class="checkout-grid">
+
+                                    <div class="form-group full-width">
+                                        <label class="form-label" for="checkout-name">
+                                            Full Name <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                id="checkout-name"
+                                                name="name"
+                                                class="form-input"
+                                                placeholder="Your full name"
+                                                autocomplete="name"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="name-error"></span>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label class="form-label" for="checkout-email">
+                                            Email Address <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                                <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                            <input
+                                                type="email"
+                                                id="checkout-email"
+                                                name="email"
+                                                class="form-input"
+                                                placeholder="you@example.com"
+                                                autocomplete="email"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="email-error"></span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Delivery Address -->
+                            <div class="checkout-section">
+                                <h2 class="checkout-section-title">Delivery Address</h2>
+                                <div class="checkout-grid">
+
+                                    <div class="form-group full-width">
+                                        <label class="form-label" for="checkout-address">
+                                            Street Address <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="1.5"/>
+                                                <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                id="checkout-address"
+                                                name="address"
+                                                class="form-input"
+                                                placeholder="House no., Street, Area"
+                                                autocomplete="street-address"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="address-error"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="checkout-city">
+                                            City <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                id="checkout-city"
+                                                name="city"
+                                                class="form-input"
+                                                placeholder="City"
+                                                autocomplete="address-level2"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="city-error"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="checkout-state">
+                                            State <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                id="checkout-state"
+                                                name="state"
+                                                class="form-input"
+                                                placeholder="State"
+                                                autocomplete="address-level1"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="state-error"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="checkout-pincode">
+                                            Pin Code <span class="required">*</span>
+                                        </label>
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.5"/>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                id="checkout-pincode"
+                                                name="pincode"
+                                                class="form-input"
+                                                placeholder="6-digit pin code"
+                                                maxlength="6"
+                                                inputmode="numeric"
+                                                required
+                                            >
+                                        </div>
+                                        <span class="field-error" id="pincode-error"></span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="checkout-section">
+                                <h2 class="checkout-section-title">Payment Method</h2>
+                                <div class="payment-options">
+
+                                    <label class="payment-option">
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value="Cash"
+                                            checked
+                                        >
+                                        <div class="payment-card">
+                                            <div class="payment-card-icon">💵</div>
+                                            <div>
+                                                <p class="payment-card-label">Cash</p>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label class="payment-option">
+                                        <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value="UPI"
+                                        >
+                                        <div class="payment-card">
+                                            <div class="payment-card-icon">📱</div>
+                                            <div>
+                                                <p class="payment-card-label">UPI</p>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                </div>
+                                <span class="field-error" id="payment-error"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- Submit -->
+                        <div style="margin-top: 16px;">
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-full btn-lg"
+                                id="checkout-submit"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                Place Order — ₹{{ "%.2f"|format(total) }}
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <!-- ── Right: Order Summary ──────────────── -->
+                    <div class="checkout-summary">
+                        <div class="checkout-summary-header">Order Summary</div>
+                        <div class="checkout-items-list" id="checkout-summary-items">
+                            {% for item in cart_items %}
+                            <div class="checkout-item">
+                                <span class="checkout-item-name">{{ item.product_name }}</span>
+                                <span class="checkout-item-qty">×{{ item.quantity }}</span>
+                                <span class="checkout-item-price">
+                                    ₹{{ "%.2f"|format(item.price * item.quantity) }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="checkout-total-row">
+                            <span>Total</span>
+                            <span class="checkout-total-amount">₹{{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div class="checkout-submit-wrap">
+                            <p class="text-xs text-muted" style="text-align:center;">
+                                By placing your order you agree to our terms &amp; conditions.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+</body>
+</html>

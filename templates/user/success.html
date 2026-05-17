@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Success Content ─────────────────────────────────── -->
+    <div class="page-wrapper">
+        <div class="success-overlay">
+            <div class="success-card">
+
+                <!-- Animated checkmark -->
+                <div class="success-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <h1 class="success-title">Thank You!</h1>
+                <p class="success-subtitle">
+                    Your order has been placed successfully.<br>
+                    We'll get it ready for you shortly.
+                </p>
+
+                <!-- Total amount -->
+                <div class="success-amount">
+                    <span class="success-amount-label">Total Amount Paid</span>
+                    <span class="success-amount-value">₹{{ "%.2f"|format(total) }}</span>
+                </div>
+
+                <!-- Order details -->
+                <div class="success-details">
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">Name</span>
+                        <span class="success-detail-val">{{ name }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">Email</span>
+                        <span class="success-detail-val">{{ email }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">Address</span>
+                        <span class="success-detail-val">{{ address }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">City</span>
+                        <span class="success-detail-val">{{ city }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">State</span>
+                        <span class="success-detail-val">{{ state }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">Pin Code</span>
+                        <span class="success-detail-val">{{ pincode }}</span>
+                    </div>
+                    <div class="success-detail-row">
+                        <span class="success-detail-key">Payment</span>
+                        <span class="success-detail-val">{{ payment_method }}</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="success-actions">
+                    <a href="{{ url_for('user_orders') }}" class="btn btn-primary btn-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Track My Order
+                    </a>
+                    <a href="{{ url_for('user_vendors') }}" class="btn btn-secondary btn-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                            <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Continue Shopping
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+    </script>
+
+</body>
+</html>
