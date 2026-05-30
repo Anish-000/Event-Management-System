@@ -1,45 +1,377 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Guest - Event Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Guest – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/guests.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Add Guest</h1>
-        <div>
-            <a href="/user/guestlist" class="back-btn">Guest List</a>
-            <a href="/logout" class="logout-btn">Logout</a>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('user_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('view_cart') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="9" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="20" cy="21" r="1" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Cart
+                </a>
+                <a href="{{ url_for('view_guestlist') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Guest List
+                </a>
+                <a href="{{ url_for('user_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Order Status
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <div class="form-container">
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
-        <form method="POST" class="styled-form">
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Add <em>Guest</em></h1>
+                        <p class="page-subtitle">Add a new guest to your event list</p>
+                    </div>
+                    <a href="{{ url_for('view_guestlist') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Back to Guest List
+                    </a>
+                </div>
 
-            <div class="form-group">
-                <label>Guest Name</label>
-                <input type="text" name="guest_name" required>
+                <div class="guest-form-layout fade-in fade-in-delay-1">
+
+                    <!-- ── Form ─────────────────────────────── -->
+                    <div class="guest-form-card">
+                        <div class="guest-form-header">
+                            <div class="guest-form-header-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="19" y1="8" x2="19" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="22" y1="11" x2="16" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="guest-form-header-text">
+                                <h2>Guest Details</h2>
+                                <p>Only the name is required</p>
+                            </div>
+                        </div>
+
+                        <div class="guest-form-body">
+                            <form
+                                id="guest-form"
+                                method="POST"
+                                action="{{ url_for('add_guest') }}"
+                                novalidate
+                            >
+                                <!-- Guest Name -->
+                                <div class="form-group">
+                                    <label class="form-label" for="guest_name">
+                                        Guest Name <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="text"
+                                            id="guest_name"
+                                            name="guest_name"
+                                            class="form-input"
+                                            placeholder="Full name"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                    </div>
+                                    <span class="field-error" id="name-error"></span>
+                                </div>
+
+                                <!-- Guest Email -->
+                                <div class="form-group">
+                                    <label class="form-label" for="guest_email">
+                                        Email Address
+                                        <span class="form-hint" style="margin-left:6px;text-transform:none;letter-spacing:0;">(optional)</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="email"
+                                            id="guest_email"
+                                            name="guest_email"
+                                            class="form-input"
+                                            placeholder="guest@example.com"
+                                            autocomplete="off"
+                                        >
+                                    </div>
+                                    <span class="field-error" id="email-error"></span>
+                                </div>
+
+                                <!-- Guest Phone -->
+                                <div class="form-group">
+                                    <label class="form-label" for="guest_phone">
+                                        Phone Number
+                                        <span class="form-hint" style="margin-left:6px;text-transform:none;letter-spacing:0;">(optional)</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.08 6.08l.95-.95a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="tel"
+                                            id="guest_phone"
+                                            name="guest_phone"
+                                            class="form-input"
+                                            placeholder="Phone number"
+                                            autocomplete="off"
+                                        >
+                                    </div>
+                                    <span class="field-error" id="phone-error"></span>
+                                </div>
+
+                                <div class="d-flex gap-12 mt-8">
+                                    <a href="{{ url_for('view_guestlist') }}" class="btn btn-secondary">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                            <line x1="19" y1="8" x2="19" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <line x1="22" y1="11" x2="16" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                        Add Guest
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ── Tips Sidebar ──────────────────────── -->
+                    <div class="guest-tips-card">
+                        <div class="guest-tips-header">Tips</div>
+                        <div class="guest-tips-body">
+                            <div class="guest-tip">
+                                <div class="guest-tip-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <p class="guest-tip-text">
+                                    <strong>Name is required.</strong> Email and phone are optional but useful for sending invites.
+                                </p>
+                            </div>
+                            <div class="guest-tip">
+                                <div class="guest-tip-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <p class="guest-tip-text">
+                                    <strong>Email address</strong> helps you keep track of who received invitations.
+                                </p>
+                            </div>
+                            <div class="guest-tip">
+                                <div class="guest-tip-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.12.96.34 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.08 6.08l.95-.95a2 2 0 0 1 2.11-.45c.91.36 1.85.58 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <p class="guest-tip-text">
+                                    <strong>Phone number</strong> is handy for last-minute coordination on the event day.
+                                </p>
+                            </div>
+                            <div class="guest-tip">
+                                <div class="guest-tip-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <p class="guest-tip-text">
+                                    You can <strong>edit or remove</strong> guests anytime from the guest list page.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
-
-            <div class="form-group">
-                <label>Guest Email</label>
-                <input type="email" name="guest_email">
-            </div>
-
-            <div class="form-group">
-                <label>Guest Phone</label>
-                <input type="text" name="guest_phone">
-            </div>
-
-            <button type="submit" class="primary-btn">
-                Add Guest
-            </button>
-
-        </form>
-
+        </main>
     </div>
+
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+        /* Flash dismiss */
+        document.querySelectorAll('.flash').forEach(f => {
+            setTimeout(() => f.remove(), 5000);
+            const btn = f.querySelector('.flash-close');
+            if (btn) btn.addEventListener('click', () => f.remove());
+        });
+
+        /* Form validation */
+        const form      = document.getElementById('guest-form');
+        const nameInput = document.getElementById('guest_name');
+        const emailInput= document.getElementById('guest_email');
+        const nameErr   = document.getElementById('name-error');
+        const emailErr  = document.getElementById('email-error');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (nameInput) {
+            nameInput.addEventListener('blur', () => {
+                if (!nameInput.value.trim()) {
+                    nameInput.classList.add('is-error');
+                    if (nameErr) nameErr.textContent = 'Guest name is required.';
+                } else {
+                    nameInput.classList.remove('is-error');
+                    if (nameErr) nameErr.textContent = '';
+                }
+            });
+            nameInput.addEventListener('input', () => {
+                nameInput.classList.remove('is-error');
+                if (nameErr) nameErr.textContent = '';
+            });
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('blur', () => {
+                if (emailInput.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                    emailInput.classList.add('is-error');
+                    if (emailErr) emailErr.textContent = 'Enter a valid email address.';
+                } else {
+                    emailInput.classList.remove('is-error');
+                    if (emailErr) emailErr.textContent = '';
+                }
+            });
+            emailInput.addEventListener('input', () => {
+                emailInput.classList.remove('is-error');
+                if (emailErr) emailErr.textContent = '';
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                let valid = true;
+
+                if (!nameInput.value.trim()) {
+                    nameInput.classList.add('is-error');
+                    if (nameErr) nameErr.textContent = 'Guest name is required.';
+                    valid = false;
+                }
+
+                if (emailInput.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                    emailInput.classList.add('is-error');
+                    if (emailErr) emailErr.textContent = 'Enter a valid email address.';
+                    valid = false;
+                }
+
+                if (!valid) { e.preventDefault(); return; }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Adding…';
+            });
+        }
+    </script>
 
 </body>
 </html>
