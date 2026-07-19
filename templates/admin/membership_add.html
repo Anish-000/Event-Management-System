@@ -1,54 +1,313 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Add Membership - Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Membership – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Add Membership</h1>
-        <a href="/admin/dashboard" class="back-btn">Back to Dashboard</a>
-    </div>
-
-    <div class="form-container">
-
-        <form method="POST" class="styled-form">
-
-            <div class="form-group">
-                <label>Select User</label>
-                <select name="user_id" required>
-                    {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Membership Duration</label>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="type" value="6_months" checked>
-                        6 Months
-                    </label>
-                    <label>
-                        <input type="radio" name="type" value="1_year">
-                        1 Year
-                    </label>
-                    <label>
-                        <input type="radio" name="type" value="2_years">
-                        2 Years
-                    </label>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
                 </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('maintain_users') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Users
+                </a>
+                <a href="{{ url_for('maintain_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('membership_add') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Membership
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Orders
+                </a>
             </div>
 
-            <button type="submit" class="primary-btn">Add Membership</button>
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-        </form>
-
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Add <em>Membership</em></h1>
+                        <p class="page-subtitle">Assign a new membership plan to a user</p>
+                    </div>
+                    <a href="{{ url_for('membership_update') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Update Membership
+                    </a>
+                </div>
+
+                <div class="admin-page-layout fade-in fade-in-delay-1">
+
+                    <!-- ── Form ─────────────────────────────── -->
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <div class="admin-form-header-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="6" y1="15" x2="10" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="admin-form-header-text">
+                                <h2>Membership Details</h2>
+                                <p>All fields are mandatory</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-form-body">
+                            <form
+                                method="POST"
+                                action="{{ url_for('membership_add') }}"
+                            >
+                                <!-- Select User -->
+                                <div class="form-group">
+                                    <label class="form-label" for="user_id">
+                                        Select User <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap select-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <select
+                                            id="user_id"
+                                            name="user_id"
+                                            class="form-input form-select"
+                                            required
+                                        >
+                                            <option value="">— Choose a user —</option>
+                                            {% for user in users %}
+                                            <option value="{{ user.id }}">
+                                                {{ user.name }} ({{ user.email }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Membership Type -->
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Membership Duration <span class="required">*</span>
+                                    </label>
+                                    <div class="membership-type-selector">
+
+                                        <label class="membership-type-option">
+                                            <input
+                                                type="radio"
+                                                name="type"
+                                                value="6_months"
+                                                checked
+                                            >
+                                            <div class="membership-type-card">
+                                                <span class="membership-type-icon">🗓️</span>
+                                                <span class="membership-type-label">6 Months</span>
+                                                <span class="membership-type-duration">180 days</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="membership-type-option">
+                                            <input
+                                                type="radio"
+                                                name="type"
+                                                value="1_year"
+                                            >
+                                            <div class="membership-type-card">
+                                                <span class="membership-type-icon">⭐</span>
+                                                <span class="membership-type-label">1 Year</span>
+                                                <span class="membership-type-duration">365 days</span>
+                                            </div>
+                                        </label>
+
+                                        <label class="membership-type-option">
+                                            <input
+                                                type="radio"
+                                                name="type"
+                                                value="2_years"
+                                            >
+                                            <div class="membership-type-card">
+                                                <span class="membership-type-icon">👑</span>
+                                                <span class="membership-type-label">2 Years</span>
+                                                <span class="membership-type-duration">730 days</span>
+                                            </div>
+                                        </label>
+
+                                    </div>
+                                </div>
+
+                                <!-- Date Preview -->
+                                <div class="membership-dates-preview">
+                                    <div class="date-preview-item">
+                                        <span class="date-preview-label">Start Date</span>
+                                        <span class="date-preview-value" id="preview-start-date">—</span>
+                                    </div>
+                                    <div class="date-preview-item">
+                                        <span class="date-preview-label">End Date</span>
+                                        <span class="date-preview-value" id="preview-end-date">—</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-12 mt-24">
+                                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                            <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                            <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                                            <line x1="12" y1="14" x2="12" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <line x1="10.5" y1="15.5" x2="13.5" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                        Add Membership
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ── Info Sidebar ──────────────────────── -->
+                    <div class="admin-info-card">
+                        <div class="admin-info-header">Membership Plans</div>
+                        <div class="admin-info-body">
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">🗓️</div>
+                                <p class="admin-info-item-text">
+                                    <strong>6 Months</strong> — Standard plan, valid for 180 days from today.
+                                    Default selection as per spec.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">⭐</div>
+                                <p class="admin-info-item-text">
+                                    <strong>1 Year</strong> — Popular plan, valid for 365 days.
+                                    Great value for regular event planners.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">👑</div>
+                                <p class="admin-info-item-text">
+                                    <strong>2 Years</strong> — Premium plan, valid for 730 days.
+                                    Best for long-term members.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                                        <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <p class="admin-info-item-text">
+                                    Start date is set to <strong>today</strong> automatically.
+                                    End date is calculated based on the plan selected.
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>
