@@ -1,64 +1,292 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Manage Orders - Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Orders – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Manage Orders</h1>
-        <div>
-            <a href="/admin/dashboard" class="back-btn">Dashboard</a>
-            <a href="/logout" class="logout-btn">Logout</a>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('maintain_users') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Users
+                </a>
+                <a href="{{ url_for('maintain_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('membership_add') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Membership
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Orders
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <div class="table-container">
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
-        {% if orders %}
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
-                    <th>Update Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>#{{ order.id }}</td>
-                    <td>₹{{ order.total_amount }}</td>
-                    <td>
-                        <span class="status-badge">
-                            {{ order.status }}
-                        </span>
-                    </td>
-                    <td>
-                        <form method="POST" action="/admin/update_status/{{ order.id }}" class="inline-form">
-                            <select name="status" class="small-select">
-                                <option value="Received">Received</option>
-                                <option value="Ready for Shipping">Ready for Shipping</option>
-                                <option value="Out for Delivery">Out for Delivery</option>
-                            </select>
-                            <button type="submit" class="primary-btn small-btn">
-                                Update
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <p class="empty-message">No orders available.</p>
-        {% endif %}
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">All <em>Orders</em></h1>
+                        <p class="page-subtitle">
+                            {{ orders|length }} order{{ 's' if orders|length != 1 else '' }} total
+                        </p>
+                    </div>
+                </div>
 
+                <!-- Toolbar -->
+                <div class="orders-toolbar fade-in fade-in-delay-1">
+                    <div class="orders-search-wrap">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <input
+                            type="text"
+                            class="orders-search"
+                            id="orders-search"
+                            placeholder="Search by customer name, email or order ID…"
+                        >
+                    </div>
+                    <select class="orders-filter-select" id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="Received">Received</option>
+                        <option value="Ready for Shipping">Ready for Shipping</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                    </select>
+                </div>
+
+                {% if orders %}
+                <div class="admin-orders-table fade-in fade-in-delay-2">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th style="text-align:right;">Update</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-tbody">
+                                {% for order in orders %}
+                                <tr
+                                    data-status="{{ order.status }}"
+                                    data-search="{{ order.user_name|lower }} {{ order.user_email|lower }} {{ order.id }}"
+                                >
+                                    <td>
+                                        <span style="font-family:var(--ff-mono);font-size:0.85rem;color:var(--text-muted);">
+                                            #{{ order.id }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="user-name-cell">
+                                            <div class="user-row-avatar" style="width:32px;height:32px;font-size:0.8rem;">
+                                                {{ order.user_name[0].upper() }}
+                                            </div>
+                                            <div>
+                                                <p style="font-weight:500;color:var(--text-primary);font-size:0.85rem;">
+                                                    {{ order.user_name }}
+                                                </p>
+                                                <p style="font-size:0.75rem;color:var(--text-muted);">
+                                                    {{ order.user_email }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style="font-family:var(--ff-mono);color:var(--gold);font-weight:500;">
+                                            ₹{{ "%.2f"|format(order.total_amount) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-secondary text-sm">{{ order.payment_method }}</td>
+                                    <td class="text-secondary text-sm">
+                                        {{ order.created_at[:10] if order.created_at else '—' }}
+                                    </td>
+                                    <td>
+                                        {% set s = order.status %}
+                                        {% if s == 'Received' %}
+                                            <span class="badge badge-received">{{ s }}</span>
+                                        {% elif s == 'Ready for Shipping' %}
+                                            <span class="badge badge-shipping">{{ s }}</span>
+                                        {% elif s == 'Out For Delivery' %}
+                                            <span class="badge badge-delivered">{{ s }}</span>
+                                        {% else %}
+                                            <span class="badge badge-gold">{{ s }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('admin_update_status', order_id=order.id) }}"
+                                            class="admin-status-form"
+                                        >
+                                            <select name="status" class="admin-status-select">
+                                                <option value="Received"
+                                                    {{ 'selected' if order.status == 'Received' else '' }}>
+                                                    Received
+                                                </option>
+                                                <option value="Ready for Shipping"
+                                                    {{ 'selected' if order.status == 'Ready for Shipping' else '' }}>
+                                                    Ready for Shipping
+                                                </option>
+                                                <option value="Out For Delivery"
+                                                    {{ 'selected' if order.status == 'Out For Delivery' else '' }}>
+                                                    Out For Delivery
+                                                </option>
+                                            </select>
+                                            <button type="submit" class="admin-status-btn">
+                                                Update
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="orders-empty fade-in fade-in-delay-2">
+                    <div class="orders-empty-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <h3>No orders yet</h3>
+                    <p>Orders will appear here once users start placing them.</p>
+                </div>
+                {% endif %}
+
+            </div>
+        </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+        /* Flash dismiss */
+        document.querySelectorAll('.flash').forEach(f => {
+            setTimeout(() => f.remove(), 5000);
+            const btn = f.querySelector('.flash-close');
+            if (btn) btn.addEventListener('click', () => f.remove());
+        });
+
+        /* Search + status filter */
+        const searchInput  = document.getElementById('orders-search');
+        const statusFilter = document.getElementById('status-filter');
+        const rows         = document.querySelectorAll('#orders-tbody tr');
+
+        function filterRows() {
+            const query  = searchInput  ? searchInput.value.toLowerCase()  : '';
+            const status = statusFilter ? statusFilter.value : '';
+
+            rows.forEach(row => {
+                const matchSearch = !query  || (row.dataset.search || '').includes(query);
+                const matchStatus = !status || row.dataset.status === status;
+                row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+            });
+        }
+
+        if (searchInput)  searchInput.addEventListener('input',  filterRows);
+        if (statusFilter) statusFilter.addEventListener('change', filterRows);
+    </script>
 
 </body>
 </html>

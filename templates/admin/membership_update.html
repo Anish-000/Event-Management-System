@@ -1,66 +1,379 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Update Membership - Admin</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Membership – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
-<body>
+<body class="dashboard-body">
 
-    <div class="topbar">
-        <h1>Update Membership</h1>
-        <a href="/admin/dashboard" class="back-btn">Back to Dashboard</a>
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('maintain_users') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Users
+                </a>
+                <a href="{{ url_for('maintain_vendors') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('membership_add') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Membership
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Orders
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
     </div>
 
-    <div class="table-container">
+    <!-- Embed memberships data for admin.js lookup -->
+    <script id="memberships-data" type="application/json">
+        {{ memberships | map(attribute='_mapping') | list | tojson | safe }}
+    </script>
 
-        {% if memberships %}
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Type</th>
-                    <th>End Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for m in memberships %}
-                <tr>
-                    <td>{{ m.id }}</td>
-                    <td>{{ m.name }}</td>
-                    <td>{{ m.type }}</td>
-                    <td>{{ m.end_date }}</td>
-                    <td>
-                        <span class="status {{ m.status }}">
-                            {{ m.status }}
-                        </span>
-                    </td>
-                    <td>
-                        <form method="POST" class="inline-form">
-                            <input type="hidden" name="membership_id" value="{{ m.id }}">
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
 
-                            <button type="submit" name="action" value="extend" class="primary-btn small-btn">
-                                Extend 6 Months
-                            </button>
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Update <em>Membership</em></h1>
+                        <p class="page-subtitle">Look up a membership and extend or cancel it</p>
+                    </div>
+                    <a href="{{ url_for('membership_add') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="12" y1="14" x2="12" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="10.5" y1="15.5" x2="13.5" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Add Membership
+                    </a>
+                </div>
 
-                            <button type="submit" name="action" value="cancel" class="danger-btn small-btn">
-                                Cancel
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <p class="empty-message">No memberships found.</p>
-        {% endif %}
+                <div class="admin-page-layout fade-in fade-in-delay-1">
 
+                    <!-- ── Form ─────────────────────────────── -->
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <div class="admin-form-header-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="admin-form-header-text">
+                                <h2>Update Membership</h2>
+                                <p>Enter membership number to load details</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-form-body">
+
+                            <!-- Membership ID Lookup -->
+                            <div class="form-group">
+                                <label class="form-label" for="membership-id-input">
+                                    Membership Number <span class="required">*</span>
+                                </label>
+                                <div class="membership-lookup">
+                                    <div class="form-group" style="margin-bottom:0;flex:1;">
+                                        <div class="input-wrap">
+                                            <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            </svg>
+                                            <input
+                                                type="number"
+                                                id="membership-id-input"
+                                                class="form-input"
+                                                placeholder="Enter membership ID e.g. 1"
+                                                min="1"
+                                            >
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-secondary"
+                                        id="membership-lookup-btn"
+                                    >
+                                        Look Up
+                                    </button>
+                                </div>
+                                <span class="field-error" id="lookup-error"></span>
+                            </div>
+
+                            <!-- Populated detail panel (shown by admin.js after lookup) -->
+                            <div class="membership-detail-panel" id="membership-detail-panel">
+                                <div class="membership-detail-grid">
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">Member Name</span>
+                                        <span class="membership-detail-value" id="detail-member-name">—</span>
+                                    </div>
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">Membership #</span>
+                                        <span class="membership-detail-value" id="detail-membership-id">—</span>
+                                    </div>
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">Plan Type</span>
+                                        <span class="membership-detail-value" id="detail-type">—</span>
+                                    </div>
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">Start Date</span>
+                                        <span class="membership-detail-value" id="detail-start">—</span>
+                                    </div>
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">End Date</span>
+                                        <span class="membership-detail-value" id="detail-end">—</span>
+                                    </div>
+                                    <div class="membership-detail-item">
+                                        <span class="membership-detail-label">Status</span>
+                                        <span class="membership-detail-value" id="detail-status">—</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Update Form (submitted to Flask) -->
+                            <form method="POST" action="{{ url_for('membership_update') }}">
+                                <input type="hidden" name="membership_id" id="hidden-membership-id">
+
+                                <!-- Action selector -->
+                                <div class="form-group">
+                                    <label class="form-label">Action</label>
+                                    <div class="action-selector">
+
+                                        <label class="action-option opt-extend">
+                                            <input
+                                                type="radio"
+                                                name="action"
+                                                value="extend"
+                                                checked
+                                            >
+                                            <div class="action-card">
+                                                <div class="action-card-icon">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                                                        <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                        <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p class="action-card-label">Extend</p>
+                                                    <p class="action-card-sub">+6 months from end date</p>
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                        <label class="action-option opt-cancel">
+                                            <input
+                                                type="radio"
+                                                name="action"
+                                                value="cancel"
+                                            >
+                                            <div class="action-card">
+                                                <div class="action-card-icon">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                                                        <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                        <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p class="action-card-label">Cancel</p>
+                                                    <p class="action-card-sub">Deactivate membership</p>
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-12 mt-8">
+                                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v13a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <polyline points="17,21 17,13 7,13 7,21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <polyline points="7,3 7,8 15,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                        Apply Changes
+                                    </button>
+                                </div>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                    <!-- ── All Memberships Table ─────────────── -->
+                    <div class="admin-info-card" style="max-height:600px;overflow-y:auto;">
+                        <div class="admin-info-header" style="display:flex;align-items:center;justify-content:space-between;">
+                            <span>All Memberships</span>
+                            <span class="badge badge-gold">{{ memberships|length }}</span>
+                        </div>
+
+                        <!-- Search -->
+                        <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+                            <div class="membership-search-wrap" style="position:relative;">
+                                <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <input
+                                    type="text"
+                                    id="membership-search"
+                                    class="membership-search"
+                                    placeholder="Search memberships…"
+                                    style="padding-left:32px;"
+                                >
+                            </div>
+                        </div>
+
+                        {% if memberships %}
+                        <div style="overflow-x:auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Member</th>
+                                        <th>Type</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in memberships %}
+                                    <tr
+                                        class="membership-row"
+                                        style="cursor:pointer;"
+                                        onclick="document.getElementById('membership-id-input').value='{{ m.id }}'; document.getElementById('membership-lookup-btn').click();"
+                                        title="Click to load membership #{{ m.id }}"
+                                    >
+                                        <td>
+                                            <span style="font-family:var(--ff-mono);font-size:0.8rem;color:var(--text-muted);">#{{ m.id }}</span>
+                                        </td>
+                                        <td>
+                                            <span style="font-weight:500;color:var(--text-primary);font-size:0.85rem;">{{ m.user_name }}</span>
+                                        </td>
+                                        <td>
+                                            {% if m.type == '6_months' %}
+                                                <span class="badge badge-gold">6 Mo</span>
+                                            {% elif m.type == '1_year' %}
+                                                <span class="badge badge-gold">1 Yr</span>
+                                            {% else %}
+                                                <span class="badge badge-gold">2 Yr</span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="font-size:0.8rem;color:var(--text-muted);">{{ m.end_date }}</td>
+                                        <td>
+                                            {% if m.status == 'active' %}
+                                                <span class="badge badge-active">Active</span>
+                                            {% else %}
+                                                <span class="badge badge-cancelled">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:0.875rem;">
+                            No memberships yet. <a href="{{ url_for('membership_add') }}" style="color:var(--gold);">Add one</a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>
