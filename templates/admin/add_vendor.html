@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vendor – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
+                <div class="nav-brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                Eventara
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('maintain_users') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Users
+                </a>
+                <a href="{{ url_for('maintain_vendors') }}" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Vendors
+                </a>
+                <a href="{{ url_for('membership_add') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Membership
+                </a>
+                <a href="{{ url_for('admin_orders') }}" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Orders
+                </a>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-user">
+                    <div class="nav-avatar">{{ session.name[0].upper() }}</div>
+                    <span>{{ session.name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="nav-logout">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Logout
+                </a>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ──────────────────────────────────── -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'success' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" aria-label="Dismiss">&times;</button>
+                </div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    <!-- ── Page Content ────────────────────────────────────── -->
+    <div class="page-wrapper">
+        <main class="dashboard-main">
+            <div class="container">
+
+                <div class="page-header fade-in">
+                    <div>
+                        <h1 class="page-title">Add <em>Vendor</em></h1>
+                        <p class="page-subtitle">Create a new vendor account</p>
+                    </div>
+                    <a href="{{ url_for('maintain_vendors') }}" class="btn btn-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                            <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Back to Vendors
+                    </a>
+                </div>
+
+                <div class="admin-page-layout fade-in fade-in-delay-1">
+
+                    <!-- ── Form ─────────────────────────────── -->
+                    <div class="admin-form-card">
+                        <div class="admin-form-header">
+                            <div class="admin-form-header-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="12" y1="22" x2="12" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="admin-form-header-text">
+                                <h2>Vendor Details</h2>
+                                <p>All fields are required</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-form-body">
+                            <form
+                                id="admin-vendor-form"
+                                method="POST"
+                                action="{{ url_for('admin_add_vendor') }}"
+                                novalidate
+                            >
+                                <!-- Hidden hash field -->
+                                <input type="hidden" name="password_hash" id="password_hash">
+
+                                <!-- Full Name -->
+                                <div class="form-group">
+                                    <label class="form-label" for="admin-name">
+                                        Full Name <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="text"
+                                            id="admin-name"
+                                            name="name"
+                                            class="form-input"
+                                            placeholder="Vendor's full name"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                    </div>
+                                    <span class="field-error" id="admin-name-error"></span>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="form-group">
+                                    <label class="form-label" for="admin-email">
+                                        Email Address <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="email"
+                                            id="admin-email"
+                                            name="email"
+                                            class="form-input"
+                                            placeholder="vendor@example.com"
+                                            autocomplete="off"
+                                            required
+                                        >
+                                    </div>
+                                    <span class="field-error" id="admin-email-error"></span>
+                                </div>
+
+                                <!-- Category -->
+                                <div class="form-group">
+                                    <label class="form-label" for="category">
+                                        Category <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap select-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <select
+                                            id="category"
+                                            name="category"
+                                            class="form-input form-select"
+                                            required
+                                        >
+                                            <option value="">— Select a category —</option>
+                                            <option value="Catering">🍽️ Catering</option>
+                                            <option value="Florist">🌸 Florist</option>
+                                            <option value="Decoration">🎨 Decoration</option>
+                                            <option value="Lighting">💡 Lighting</option>
+                                        </select>
+                                    </div>
+                                    <span class="field-error" id="category-error"></span>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="form-group">
+                                    <label class="form-label" for="admin-password">
+                                        Password <span class="required">*</span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <input
+                                            type="password"
+                                            id="admin-password"
+                                            name="password"
+                                            class="form-input"
+                                            placeholder="Minimum 6 characters"
+                                            autocomplete="new-password"
+                                            required
+                                        >
+                                    </div>
+                                    <span class="field-error" id="admin-password-error"></span>
+                                </div>
+
+                                <div class="d-flex gap-12 mt-8">
+                                    <a href="{{ url_for('maintain_vendors') }}" class="btn btn-secondary">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="admin-submit-btn">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                                            <line x1="12" y1="22" x2="12" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                        Add Vendor
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ── Info Sidebar ──────────────────────── -->
+                    <div class="admin-info-card">
+                        <div class="admin-info-header">Notes</div>
+                        <div class="admin-info-body">
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">🍽️</div>
+                                <p class="admin-info-item-text">
+                                    <strong>Catering</strong> — food and beverage services for events.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">🌸</div>
+                                <p class="admin-info-item-text">
+                                    <strong>Florist</strong> — floral arrangements and decorations.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">🎨</div>
+                                <p class="admin-info-item-text">
+                                    <strong>Decoration</strong> — event décor, themes, and styling.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">💡</div>
+                                <p class="admin-info-item-text">
+                                    <strong>Lighting</strong> — stage, ambient, and event lighting setups.
+                                </p>
+                            </div>
+
+                            <div class="admin-info-item">
+                                <div class="admin-info-item-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </div>
+                                <p class="admin-info-item-text">
+                                    Password is <strong>SHA-256 hashed</strong> before saving. The vendor can log in immediately.
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /* Nav toggle */
+        const toggle = document.getElementById('nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (toggle && links) toggle.addEventListener('click', () => links.classList.toggle('open'));
+
+        /* Flash dismiss */
+        document.querySelectorAll('.flash').forEach(f => {
+            setTimeout(() => f.remove(), 5000);
+            const btn = f.querySelector('.flash-close');
+            if (btn) btn.addEventListener('click', () => f.remove());
+        });
+
+        /* SHA-256 + validation */
+        async function sha256(message) {
+            const data = new TextEncoder().encode(message);
+            const buf  = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        const form       = document.getElementById('admin-vendor-form');
+        const nameInput  = document.getElementById('admin-name');
+        const emailInput = document.getElementById('admin-email');
+        const catInput   = document.getElementById('category');
+        const passInput  = document.getElementById('admin-password');
+        const passHash   = document.getElementById('password_hash');
+        const nameErr    = document.getElementById('admin-name-error');
+        const emailErr   = document.getElementById('admin-email-error');
+        const catErr     = document.getElementById('category-error');
+        const passErr    = document.getElementById('admin-password-error');
+        const submitBtn  = document.getElementById('admin-submit-btn');
+
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                let valid = true;
+
+                if (!nameInput.value.trim()) {
+                    nameInput.classList.add('is-error');
+                    if (nameErr) nameErr.textContent = 'Name is required.';
+                    valid = false;
+                } else {
+                    nameInput.classList.remove('is-error');
+                    if (nameErr) nameErr.textContent = '';
+                }
+
+                if (!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                    emailInput.classList.add('is-error');
+                    if (emailErr) emailErr.textContent = 'Valid email is required.';
+                    valid = false;
+                } else {
+                    emailInput.classList.remove('is-error');
+                    if (emailErr) emailErr.textContent = '';
+                }
+
+                if (!catInput.value) {
+                    catInput.classList.add('is-error');
+                    if (catErr) catErr.textContent = 'Please select a category.';
+                    valid = false;
+                } else {
+                    catInput.classList.remove('is-error');
+                    if (catErr) catErr.textContent = '';
+                }
+
+                if (!passInput.value || passInput.value.length < 6) {
+                    passInput.classList.add('is-error');
+                    if (passErr) passErr.textContent = 'Password must be at least 6 characters.';
+                    valid = false;
+                } else {
+                    passInput.classList.remove('is-error');
+                    if (passErr) passErr.textContent = '';
+                }
+
+                if (!valid) return;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Adding…';
+
+                const hashed = await sha256(passInput.value);
+                passHash.value  = hashed;
+                passInput.value = '';
+
+                this.submit();
+            });
+        }
+    </script>
+
+</body>
+</html>
