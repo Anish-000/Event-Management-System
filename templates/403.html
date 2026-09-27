@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Forbidden – Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
+<body>
+
+    <div class="error-page">
+        <div class="error-page-inner">
+
+            <div class="error-code">403</div>
+
+            <h2>Access Forbidden</h2>
+            <p>
+                You don't have permission to view this page.
+                Please make sure you're logged in with the correct account.
+            </p>
+
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="{{ url_for('home') }}" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                    Go Home
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <polyline points="10,17 15,12 10,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="15" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Back to Login
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
